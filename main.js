@@ -1,10 +1,7 @@
 'use strict';
-const { app, BrowserWindow, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, clipboard } = require('electron');
 const path = require('path');
-
-// Expose real LAN IPs in WebRTC ICE candidates (no mDNS obfuscation) so
-// direct peer-to-peer connections work on a local network without any server.
-app.commandLine.appendSwitch('disable-features', 'WebRtcHideLocalIpsWithMdns');
+const { pathToFileURL } = require('url');
 
 let mainWindow = null;
 
@@ -21,8 +18,10 @@ function createWindow() {
     backgroundColor: '#07070f',
     title: 'Turbo Type Racer',
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true
     }
   });
 
@@ -37,18 +36,35 @@ function createWindow() {
     }
   });
 
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url !== pathToFileURL(path.join(__dirname, 'index.html')).href) event.preventDefault();
+  });
+
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
 ipcMain.on('win-min', (e) => {
+  if (!isTrustedRenderer(e)) return;
   const w = BrowserWindow.fromWebContents(e.sender);
   if (w) w.minimize();
 });
 
 ipcMain.on('win-close', (e) => {
+  if (!isTrustedRenderer(e)) return;
   const w = BrowserWindow.fromWebContents(e.sender);
   if (w) w.close();
 });
+
+ipcMain.handle('copy-text', (event, value) => {
+  if (!isTrustedRenderer(event)) return false;
+  clipboard.writeText(String(value ?? ''));
+  return true;
+});
+
+function isTrustedRenderer(event) {
+  return event.senderFrame && event.senderFrame.url === pathToFileURL(path.join(__dirname, 'index.html')).href;
+}
 
 app.whenReady().then(() => {
   createWindow();

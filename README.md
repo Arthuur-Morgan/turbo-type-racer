@@ -1,135 +1,75 @@
 # Turbo Type Racer
 
-Cyberpunk-themed desktop typing racing game featuring bot opponents and serverless WebRTC peer-to-peer multiplayer, developed in Electron.
+Cyberpunk-themed desktop typing racer with AI opponents and peer-to-peer multiplayer, built with Electron.
 
 **Creator:** Dipayan Bhanja
 
----
-
-## Overview
-
-Turbo Type Racer combines speed typing with arcade racing. Each keystroke propels your vehicle forward across a neon track, calculating your real-time WPM, accuracy, and position against AI drivers or friends over direct peer-to-peer connections.
-
----
-
 ## Features
 
-- **Single Player Mode**:
-  - Three opponent speed tiers:
-    - Beginner: 30–45 WPM
-    - Normal: 55–70 WPM
-    - Expert: 85–105 WPM
-  - Opponents feature natural drift, typing bursts, and variable pacing to simulate realistic human typing behavior.
+- Race two AI drivers at Beginner, Normal, or Expert difficulty. Their pace drifts and includes short speed bursts.
+- Play a friend directly over WebRTC using manual offer and answer exchange; no game server or account is required.
+- Finish results wait for both human racers. The host also simulates and synchronizes the podium's ghost bot.
+- Track personal race count, wins, best WPM, best accuracy, and selected difficulty on this device using browser local storage.
+- Use the frameless desktop window, F11 fullscreen, keyboard typing, and accessible focus/status cues.
 
-- **Peer-to-Peer Multiplayer (WebRTC)**:
-  - Direct browser-to-browser data channel communication using manual SDP offer and answer string exchange.
-  - Ghost Bot fills the third lane at Normal speed to complete podium standings (1st, 2nd, and 3rd place). The host simulates this bot and synchronizes its coordinates with the guest.
-  - Telemetry synchronization streaming position, current WPM, and accuracy every 100 ms over an ordered data channel.
-  - Rematch flow that maintains the active connection across rounds.
-
-- **Networking Modes**:
-  - Local Area Network (LAN): Chromium WebRTC local IP obfuscation (`WebRtcHideLocalIpsWithMdns`) is disabled in the main process, allowing direct local network play without internet access.
-  - Internet Play: Optional Google public STUN server (`stun:stun.l.google.com:19302`) configuration for NAT traversal across different networks.
-
-- **User Interface & Controls**:
-  - Custom frameless 1200x800 window with built-in minimize and close window controls.
-  - Fullscreen toggle via F11.
-  - Procedural inline SVG car graphics with responsive glow styling.
-  - Real-time HTML5 canvas rendering for checkered finish line.
-  - Race summary modal displaying final WPM, accuracy, and podium placements.
-
----
-
-## Project Structure
+## Project structure
 
 ```text
 turbo-type-racer/
-├── index.html        # UI, typing engine, SVG rendering, and WebRTC logic
-├── main.js           # Electron lifecycle, frameless window, IPC handlers
-├── package.json      # Project dependencies and build scripts
-├── package-lock.json # Dependency lockfile
-├── .gitignore        # Ignored files for version control
-├── LICENSE           # MIT License
-└── README.md         # Documentation
+├── .github/workflows/ci.yml  # Unit checks and Windows packaging artifact
+├── app.js                    # UI, typing, AI, race and WebRTC coordination
+├── game-core.js              # Pure gameplay calculations shared with tests
+├── index.html                # Semantic interface and content security policy
+├── main.js                   # Electron lifecycle and window controls
+├── preload.js                # Narrow, context-isolated desktop API
+├── styles.css                # Game presentation and responsive accessibility
+├── test/game-core.test.js    # Node built-in unit tests
+├── package.json
+└── package-lock.json
 ```
 
----
+## Requirements and setup
 
-## Prerequisites
+- Node.js 22.12 or newer
+- npm
 
-- Node.js (v18 or higher recommended)
-- npm (installed with Node.js)
-
----
-
-## Installation
-
-Install development dependencies:
+Install dependencies and start the app:
 
 ```bash
-npm install
-```
-
----
-
-## Running the Game
-
-Start the development Electron window:
-
-```bash
+npm ci
 npm start
 ```
 
-### Controls
+Run the gameplay unit tests:
 
-- Type: Match the highlighted text displayed on screen.
-- Backspace: Clear incorrect keystrokes.
-- Escape: Exit race and return to the main menu.
-- F11: Toggle fullscreen.
+```bash
+npm test
+```
 
----
-
-## Multiplayer Setup
-
-### Host Instructions:
-1. Select "Host Game" from the main menu.
-2. If connecting over the internet, check "Use public STUN server". For LAN play, leave it unchecked.
-3. Click "1. Generate Offer".
-4. Click "Copy Offer" and send the generated string to the guest player.
-5. Paste the guest player's answer string into the answer field and click "2. Connect".
-6. Once connected, click "Start Race".
-
-### Guest Instructions:
-1. Select "Join Game" from the main menu.
-2. If the host enabled the STUN option, check "Use public STUN server" as well.
-3. Paste the host's offer string into the top field.
-4. Click "Generate Answer & Connect".
-5. Click "Copy Answer" and send the answer string back to the host.
-6. The connection will establish automatically once the host applies the answer string.
-
----
-
-## Building Standalone Application
-
-To package a standalone 64-bit Windows executable into the `dist/` directory:
+Build the standalone 64-bit Windows app:
 
 ```bash
 npm run package-win
 ```
 
-Output path:
-```text
-dist/TurboTypeRacer-win32-x64/TurboTypeRacer.exe
-```
+The output is `dist/TurboTypeRacer-win32-x64/TurboTypeRacer.exe`. GitHub Actions runs the tests and stores a Windows build artifact for 14 days on pushes, pull requests, and manual runs.
 
----
+## Controls
 
-## Credits
+- Type the highlighted passage to move. An incorrect letter must be cleared with Backspace before continuing.
+- Press Escape during a race or countdown to return to the main menu.
+- Press F11 to toggle fullscreen.
 
-- **Creator & Developer:** Dipayan Bhanja
+## Multiplayer
 
----
+The host generates an offer and sends it to the guest. The guest creates an answer and sends it back; the host pastes the answer and connects. Both players must choose the same STUN setting. Enable the public Google STUN option when playing across the internet; it is not required for many LAN connections.
+
+WebRTC can reveal network connection details to the other peer. This app keeps Chromium's local-IP obfuscation enabled. LAN connectivity can depend on the browser's mDNS candidate support and network configuration. STUN helps with some NAT configurations but does not guarantee a connection through every firewall or symmetric NAT. The signaling offer and answer are not encrypted by this app before you share them, so exchange them privately with the intended player.
+
+## Local records and privacy
+
+Race count, wins, best WPM, best accuracy, and difficulty are stored in this app's local browser storage on the current device. They are not uploaded or synchronized. Clearing the app's site data removes them.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+MIT. See [LICENSE](LICENSE).
