@@ -29,12 +29,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run package-win
-      - name: Zip Windows app
-        shell: pwsh
-        run: Compress-Archive -Path dist/TurboTypeRacer-win32-x64 -DestinationPath TurboTypeRacer-win32-x64.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: TurboTypeRacer-windows-x64.zip
-          path: TurboTypeRacer-win32-x64.zip
+          name: TurboTypeRacer-windows-x64
+          path: dist/TurboTypeRacer-win32-x64/
           if-no-files-found: error
           retention-days: 14
