@@ -1,0 +1,43 @@
+name: Windows release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to publish"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run package-win
+
+      - name: Zip Windows app
+        shell: pwsh
+        run: Compress-Archive -Path dist/TurboTypeRacer-win32-x64 -DestinationPath TurboTypeRacer-win32-x64.zip
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: gh release create $env:RELEASE_TAG TurboTypeRacer-win32-x64.zip --verify-tag --title "Turbo Type Racer $env:RELEASE_TAG" --generate-notes
