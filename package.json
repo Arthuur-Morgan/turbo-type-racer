@@ -1,0 +1,16 @@
+{
+  "name": "turbo-type-racer",
+  "version": "1.0.0",
+  "description": "Cyberpunk car racing typing game with AI opponents and WebRTC peer-to-peer multiplayer.",
+  "main": "main.js",
+  "author": "Dipayan Bhanja",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "package-win": "electron-packager . TurboTypeRacer --platform=win32 --arch=x64 --out=dist --overwrite --asar --ignore=^/dist$"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-packager": "^17.1.2"
+  }
+}

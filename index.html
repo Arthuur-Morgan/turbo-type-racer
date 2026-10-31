@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turbo Type Racer</title>
+<style>
+:root{--cy:#00f0ff;--pk:#ff2d95;--lm:#9dff00;--bg:#07070f;--gl:rgba(255,255,255,.06);--bd:rgba(255,255,255,.14);--tx:#e8ecff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:radial-gradient(1200px 600px at 20% -10%,#1b0f3a 0,transparent 60%),radial-gradient(900px 600px at 90% 110%,#052a35 0,transparent 60%),var(--bg);color:var(--tx);font-family:"Segoe UI",system-ui,sans-serif;overflow-x:hidden;min-height:100vh}
+.mono{font-family:Consolas,"Courier New",monospace}
+.tb{position:fixed;top:0;left:0;right:0;height:36px;z-index:50;display:flex;align-items:center;justify-content:space-between;padding-left:16px;background:rgba(5,5,12,.8);backdrop-filter:blur(10px);border-bottom:1px solid var(--bd);-webkit-app-region:drag;font-size:.75rem;letter-spacing:.3em;color:#8d97bf}
+.tb div{display:flex;-webkit-app-region:no-drag}.tb button{width:46px;height:36px;border:0;background:transparent;color:#cfd6ff;font-size:1rem;cursor:pointer}
+.tb button:hover{background:rgba(255,255,255,.1)}.tb #wClose:hover{background:#e81123}
+.screen{display:none;min-height:100vh;padding:56px 24px 24px;flex-direction:column;align-items:center;justify-content:center;gap:22px}
+.screen.on{display:flex;animation:fade .45s ease}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.glass{background:var(--gl);border:1px solid var(--bd);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,.45)}
+h1.logo{font-size:clamp(2.4rem,6vw,4.6rem);font-weight:900;letter-spacing:.06em;text-transform:uppercase;font-style:italic;background:linear-gradient(90deg,var(--cy),var(--pk),var(--lm));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(0,240,255,.45));text-align:center}
+.sub{color:#9aa3c7;letter-spacing:.3em;text-transform:uppercase;font-size:.78rem;text-align:center}
+.modes{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+.mode{width:270px;padding:26px;cursor:pointer;transition:.3s;text-align:left;color:inherit;font:inherit}
+.mode:hover{transform:translateY(-8px)}
+.mode.a:hover{border-color:var(--cy);box-shadow:0 0 34px rgba(0,240,255,.35)}.mode.b:hover{border-color:var(--pk);box-shadow:0 0 34px rgba(255,45,149,.35)}.mode.c:hover{border-color:var(--lm);box-shadow:0 0 34px rgba(157,255,0,.3)}
+.mode h2{font-size:1.3rem;margin:10px 0 8px}.mode p{color:#a9b2d6;font-size:.88rem;line-height:1.5}
+.tag{display:inline-block;padding:4px 10px;border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.15em}
+.a .tag{background:rgba(0,240,255,.15);color:var(--cy)}.b .tag{background:rgba(255,45,149,.15);color:var(--pk)}.c .tag{background:rgba(157,255,0,.13);color:var(--lm)}
+.btn{border:0;cursor:pointer;padding:13px 30px;border-radius:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:.9rem;color:#05060c;background:linear-gradient(90deg,var(--cy),var(--lm));transition:.25s;box-shadow:0 0 22px rgba(0,240,255,.4)}
+.btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 0 34px rgba(157,255,0,.55)}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--bd);box-shadow:none}
+.btn.sm{padding:8px 16px;font-size:.75rem}
+.panel{width:min(640px,96vw);padding:28px;display:flex;flex-direction:column;gap:14px}
+.panel h2{font-size:1.4rem;letter-spacing:.1em;text-transform:uppercase}
+.panel label{font-size:.7rem;letter-spacing:.2em;color:#8d97bf;text-transform:uppercase}
+textarea{width:100%;height:92px;resize:none;border-radius:12px;border:1px solid var(--bd);background:rgba(0,0,0,.4);color:var(--cy);font:12px Consolas,monospace;padding:10px;outline:none;word-break:break-all}
+textarea:focus{border-color:var(--cy);box-shadow:0 0 14px rgba(0,240,255,.3)}
+.step{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chk{display:flex;gap:8px;align-items:center;font-size:.8rem;color:#a9b2d6;letter-spacing:0;text-transform:none!important}
+.stt{padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--bd);font-size:.9rem}
+.stt.ok{color:var(--lm);border-color:var(--lm)}
+input[type=range]{width:100%;accent-color:var(--cy);height:6px}
+.dl{display:flex;justify-content:space-between;font-size:.8rem;color:#8d97bf;letter-spacing:.1em}
+.dl span.on{color:var(--cy);font-weight:800}
+#dDesc{text-align:center;font-size:1.1rem;font-weight:700;color:var(--lm)}
+#game{justify-content:flex-start;gap:16px}
+.stats{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;width:min(1100px,100%)}
+.stat{flex:1;min-width:120px;padding:10px 16px;text-align:center}
+.stat small{display:block;color:#8d97bf;letter-spacing:.25em;font-size:.62rem;text-transform:uppercase}
+.stat b{font-size:1.9rem;font-variant-numeric:tabular-nums}
+#sW b{color:var(--cy);text-shadow:0 0 14px var(--cy)}#sA b{color:var(--lm);text-shadow:0 0 14px var(--lm)}#sT b{color:var(--pk);text-shadow:0 0 14px var(--pk)}
+.track{position:relative;width:min(1100px,100%);border-radius:18px;overflow:hidden;border:2px solid #2a2f55;box-shadow:0 0 40px rgba(0,240,255,.15),inset 0 0 60px rgba(0,0,0,.6);background:#14151f}
+.lane{position:relative;height:92px;background:linear-gradient(#171827,#1d1f33);overflow:hidden}
+.lane::before{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:repeating-linear-gradient(90deg,#fff 0 36px,transparent 36px 72px);opacity:.55}
+.lane:last-of-type::before{background:repeating-linear-gradient(90deg,var(--pk) 0 40px,transparent 40px 80px);opacity:.8}
+.lane::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.035) 0 3px,transparent 3px 120px)}
+.racing .lane::before{animation:mv .5s linear infinite}.racing .lane::after{animation:mv2 .35s linear infinite}
+@keyframes mv{to{background-position:-72px 0}}@keyframes mv2{to{background-position:-120px 0}}
+.lbl{position:absolute;top:6px;left:10px;z-index:3;display:flex;gap:8px;align-items:center;font-size:.76rem;font-weight:700;padding:3px 10px;border-radius:99px;background:rgba(0,0,0,.55);border:1px solid var(--bd)}
+.lbl i{font-style:normal;color:#aab}
+.flag{display:inline-block;min-width:34px;text-align:center;padding:3px 6px;border-radius:6px;background:linear-gradient(135deg,#243b6b,#5a2a6b);font-size:.7rem;font-weight:800;letter-spacing:.08em;color:#fff}
+.car{position:absolute;top:18px;width:120px;height:56px;left:calc(var(--p) * (100% - 156px) + 8px);transition:left .12s linear;z-index:2}
+.car svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 8px var(--glow))}
+.racing .car svg{animation:jit .18s ease-in-out infinite alternate}
+@keyframes jit{from{transform:translateY(-1px)}to{transform:translateY(1px)}}
+#fin{position:absolute;right:0;top:0;height:100%;width:32px;z-index:1;border-left:2px solid #fff;box-shadow:0 0 22px rgba(255,255,255,.5)}
+.type{width:min(1100px,100%);padding:24px 28px}
+#text{font-size:1.4rem;line-height:2.05;letter-spacing:.02em;user-select:none;word-break:break-word}
+#text span{color:#6b7299;border-radius:3px;transition:color .08s,background .08s}
+#text span.ok{color:var(--lm);text-shadow:0 0 8px rgba(157,255,0,.5)}
+#text span.cur{color:#fff;background:rgba(0,240,255,.28);box-shadow:0 2px 0 var(--cy);animation:bl 1s steps(2) infinite}
+#text span.bad{color:#fff;background:#ff1744;box-shadow:0 0 14px #ff1744}
+@keyframes bl{50%{background:rgba(0,240,255,.08)}}
+.hint{margin-top:8px;font-size:.78rem;color:#7f89b3;letter-spacing:.1em}
+.shake{animation:sk .2s}@keyframes sk{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+#cd{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:20;background:rgba(5,5,12,.55);backdrop-filter:blur(4px);pointer-events:none}
+#cd.on{display:flex}
+#cd span{font-size:clamp(6rem,20vw,13rem);font-weight:900;font-style:italic;text-shadow:0 0 40px var(--cy),0 0 90px var(--pk);animation:pop .9s ease-out}
+@keyframes pop{from{transform:scale(2.2);opacity:0}30%{opacity:1}to{transform:scale(1)}}
+#modal{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(3,3,10,.75);backdrop-filter:blur(10px);padding:16px}
+#modal.on{display:flex}
+.mbox{width:min(560px,100%);padding:32px;text-align:center;animation:fade .5s}
+.mbox h2{font-size:2rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;background:linear-gradient(90deg,var(--cy),var(--pk));-webkit-background-clip:text;background-clip:text;color:transparent}
+.podium{display:flex;flex-direction:column;gap:10px;margin:20px 0}
+.row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--bd);text-align:left;animation:fade .5s both}
+.row:nth-child(2){animation-delay:.15s}.row:nth-child(3){animation-delay:.3s}
+.rk{width:52px;text-align:center;font-weight:900;padding:6px 0;border-radius:10px;color:#07070f}
+.r1 .rk{background:linear-gradient(135deg,#ffe066,#ff9f1c);box-shadow:0 0 18px #ffb703}.r2 .rk{background:linear-gradient(135deg,#f1f5f9,#94a3b8)}.r3 .rk{background:linear-gradient(135deg,#f6ad76,#b45309)}
+.row .nm{flex:1;font-weight:700}.row .pc{color:#9aa3c7;font-size:.82rem}
+.res{display:flex;gap:14px;margin-bottom:20px}
+.res div{flex:1;padding:14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--bd)}
+.res small{display:block;font-size:.62rem;letter-spacing:.25em;color:#8d97bf}.res b{font-size:1.8rem}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:60;padding:12px 22px;border-radius:12px;background:rgba(255,45,149,.2);border:1px solid var(--pk);backdrop-filter:blur(10px);display:none}
+</style>
+</head>
+<body>
+<div class="tb"><span>TURBO TYPE RACER</span><div><button id="wMin" title="Minimize">&#8212;</button><button id="wClose" title="Close">&#215;</button></div></div>
+
+<section id="home" class="screen on">
+  <div><h1 class="logo">Turbo Type Racer</h1><p class="sub">Type fast &bull; Drive faster</p></div>
+  <div class="modes">
+    <button class="mode a glass" id="bSolo"><span class="tag">SOLO</span><h2>Single Player</h2><p>Race two AI drivers. Pick Beginner, Normal or Expert.</p></button>
+    <button class="mode b glass" id="bHost"><span class="tag">P2P</span><h2>Host Game</h2><p>Create a direct WebRTC connection string and share it with a friend.</p></button>
+    <button class="mode c glass" id="bJoin"><span class="tag">P2P</span><h2>Join Game</h2><p>Paste your friend's offer string and send back an answer string.</p></button>
+  </div>
+</section>
+
+<section id="solo" class="screen">
+  <div class="panel glass">
+    <h2>Difficulty</h2>
+    <input type="range" id="dRange" min="0" max="2" step="1" value="1">
+    <div class="dl" id="dLbl"><span>BEGINNER</span><span>NORMAL</span><span>EXPERT</span></div>
+    <div id="dDesc"></div>
+    <div class="step"><button class="btn" id="dGo">Start Race</button><button class="btn ghost" data-home>Back</button></div>
+  </div>
+</section>
+
+<section id="host" class="screen">
+  <div class="panel glass">
+    <h2>Host Game</h2>
+    <label class="chk"><input type="checkbox" id="stunH"> Use public STUN server (only needed to play over the internet; LAN works without)</label>
+    <div class="step"><button class="btn sm" id="hGen">1. Generate Offer</button></div>
+    <label>Your offer string &mdash; send this to your friend</label>
+    <textarea id="hOffer" readonly placeholder="Offer will appear here..."></textarea>
+    <div class="step"><button class="btn sm ghost" id="hCopy">Copy Offer</button></div>
+    <label>Paste your friend's answer string</label>
+    <textarea id="hAns" placeholder="Paste answer here..."></textarea>
+    <div class="step"><button class="btn sm" id="hConn">2. Connect</button></div>
+    <div class="stt" id="hStat">Not connected</div>
+    <div class="step"><button class="btn" id="hStart" disabled>Start Race</button><button class="btn ghost" data-home>Back</button></div>
+  </div>
+</section>
+
+<section id="join" class="screen">
+  <div class="panel glass">
+    <h2>Join Game</h2>
+    <label class="chk"><input type="checkbox" id="stunG"> Use public STUN server (only needed to play over the internet; LAN works without)</label>
+    <label>Paste the host's offer string</label>
+    <textarea id="gOffer" placeholder="Paste offer here..."></textarea>
+    <div class="step"><button class="btn sm" id="gGen">Generate Answer &amp; Connect</button></div>
+    <label>Your answer string &mdash; send this back to the host</label>
+    <textarea id="gAns" readonly placeholder="Answer will appear here..."></textarea>
+    <div class="step"><button class="btn sm ghost" id="gCopy">Copy Answer</button></div>
+    <div class="stt" id="gStat">Not connected</div>
+    <div class="step"><button class="btn ghost" data-home>Back</button></div>
+  </div>
+</section>
+
+<section id="game" class="screen">
+  <div class="stats">
+    <div class="stat glass" id="sW"><small>WPM</small><b id="vW">0</b></div>
+    <div class="stat glass" id="sA"><small>Accuracy</small><b id="vA">100%</b></div>
+    <div class="stat glass" id="sT"><small>Time</small><b id="vT">0.0s</b></div>
+    <div class="stat glass"><small>Progress</small><b id="vP">0%</b></div>
+  </div>
+  <div class="track" id="track"><canvas id="fin" width="32" height="276"></canvas></div>
+  <div class="type glass" id="typeBox">
+    <div id="text" class="mono"></div>
+    <div class="hint">Type the text above. Fix typos with BACKSPACE before continuing. &nbsp;|&nbsp; ESC to quit.</div>
+  </div>
+</section>
+
+<div id="cd"><span id="cdn">3</span></div>
+<div id="toast"></div>
+
+<div id="modal">
+  <div class="mbox glass">
+    <h2 id="mTitle">Race Results</h2>
+    <div class="sub" id="mSub"></div>
+    <div class="podium" id="podium"></div>
+    <div class="res">
+      <div><small>YOUR WPM</small><b id="rW" style="color:var(--cy)">0</b></div>
+      <div><small>ACCURACY</small><b id="rA" style="color:var(--lm)">0%</b></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn" id="bAgain">Retry</button>
+      <button class="btn ghost" id="bMenu">Main Menu</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var ipc=null,clip=null;
+try{var el=require("electron");ipc=el.ipcRenderer;clip=el.clipboard}catch(e){}
+var TEXTS=[
+"The engine roars to life as the green light flashes across the starting grid. Every keystroke is a shift of gear, every word a corner taken at full speed. Stay calm, keep your fingers fast, and let the rhythm carry you toward the checkered flag.",
+"Under the neon skyline the highway stretches into the night, glowing with streaks of cyan and pink. Precision beats panic on every straight, so breathe steadily, correct each mistake, and push the throttle when the road opens up ahead of you.",
+"Champions are not born at the finish line but made in the quiet hours of practice. Each accurate letter builds momentum, each clean sentence widens the gap, and the fastest driver is always the one who never lifts off the pedal.",
+"Rain hammers the asphalt while the pack screams through the final chicane. Heart pounding and hands steady, you read the road ahead like a sentence you have typed a thousand times, and the finish line rushes forward to meet you."
+];
+var DIFF=[{n:"Beginner",lo:30,hi:45},{n:"Normal",lo:55,hi:70},{n:"Expert",lo:85,hi:105}];
+var COLS=[{c:"#00f0ff",c2:"#ff2d95",m:0},{c:"#ff2d95",c2:"#ffffff",m:1},{c:"#9dff00",c2:"#0a0a0a",m:2}];
+var BODY=[
+"M6 28 C6 16 14 12 30 10 L84 8 C104 8 116 20 116 28 C116 36 104 48 84 48 L30 46 C14 44 6 40 6 28Z",
+"M4 28 C4 14 20 10 40 10 L88 11 C110 12 118 22 118 28 C118 34 110 44 88 45 L40 46 C20 46 4 42 4 28Z",
+"M8 22 L30 12 L92 10 L116 26 L116 30 L92 46 L30 44 L8 34Z"];
+var $=function(i){return document.getElementById(i)};
+function rnd(a,b){return a+Math.random()*(b-a)}
+function ri(a,b){return Math.floor(rnd(a,b+1))}
+var S={mode:"solo",role:null,diff:1,state:"idle",text:"",spans:[],idx:0,wrong:false,keys:0,good:0,t0:0,racers:[],timers:[],order:[],fw:0,fa:100};
+var NET={pc:null,ch:null};
+
+/* ---------- Car art (inline SVG) ---------- */
+function carSVG(col,id){
+  return '<svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col.c+'"/><stop offset="1" stop-color="'+col.c+'" stop-opacity=".55"/></linearGradient><radialGradient id="r'+id+'"><stop offset="0" stop-color="#ddd"/><stop offset="1" stop-color="#666"/></radialGradient></defs>'+
+  '<g fill="#0b0b10" stroke="#555"><rect x="18" y="1" width="20" height="9" rx="3"/><rect x="18" y="46" width="20" height="9" rx="3"/><rect x="80" y="1" width="20" height="9" rx="3"/><rect x="80" y="46" width="20" height="9" rx="3"/></g>'+
+  '<g fill="url(#r'+id+')"><rect x="22" y="3" width="12" height="4" rx="2"/><rect x="22" y="49" width="12" height="4" rx="2"/><rect x="84" y="3" width="12" height="4" rx="2"/><rect x="84" y="49" width="12" height="4" rx="2"/></g>'+
+  '<rect x="0" y="9" width="9" height="38" rx="2" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/><rect x="8" y="22" width="6" height="12" fill="#222"/>'+
+  '<path d="'+BODY[col.m]+'" fill="url(#g'+id+')" stroke="#fff" stroke-opacity=".7" stroke-width="1.2"/>'+
+  '<rect x="26" y="24.5" width="88" height="3" fill="'+col.c2+'"/><rect x="26" y="29.5" width="88" height="3" fill="'+col.c2+'"/>'+
+  '<path d="M52 17 L76 14 L84 28 L76 42 L52 39 L60 28Z" fill="#071522" stroke="#9fe" stroke-opacity=".6"/><path d="M64 18 L74 16.5 L79 24 L68 24Z" fill="#fff" opacity=".25"/>'+
+  '<path d="M30 14 L44 15 L44 41 L30 42" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="1.5"/>'+
+  '<path d="M80 9 L88 3 L90 7 L84 12Z" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/><path d="M80 47 L88 53 L90 49 L84 44Z" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/>'+
+  '<ellipse cx="112" cy="16" rx="4" ry="2.6" fill="#fffbd0"/><ellipse cx="112" cy="40" rx="4" ry="2.6" fill="#fffbd0"/><rect x="2" y="12" width="3" height="5" fill="#ff1744"/><rect x="2" y="39" width="3" height="5" fill="#ff1744"/></svg>';
+}
+function drawFinish(){
+  var c=$("fin"),x=c.getContext("2d"),s=8;
+  for(var yy=0;yy<Math.ceil(c.height/s);yy++)for(var xx=0;xx<Math.ceil(c.width/s);xx++){x.fillStyle=((xx+yy)%2)?"#000":"#fff";x.fillRect(xx*s,yy*s,s,s)}
+}
+
+/* ---------- Helpers ---------- */
+function show(id){["home","solo","host","join","game"].forEach(function(s){$(s).classList.toggle("on",s===id)})}
+function clearTimers(){S.timers.forEach(function(t){clearTimeout(t);clearInterval(t)});S.timers=[]}
+function later(f,ms){var t=setTimeout(f,ms);S.timers.push(t);return t}
+function every(f,ms){var t=setInterval(f,ms);S.timers.push(t);return t}
+function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(function(){t.style.display="none"},3500)}
+function copyTxt(v){if(!v)return;try{if(clip)clip.writeText(v);else navigator.clipboard.writeText(v);toast("Copied to clipboard")}catch(e){toast("Copy failed - select the text manually")}}
+function chOpen(){return NET.ch&&NET.ch.readyState==="open"}
+
+/* ---------- Race setup ---------- */
+function startRace(ti){
+  clearTimers();
+  var d=DIFF[S.diff];
+  S.text=TEXTS[ti%TEXTS.length];S.idx=0;S.wrong=false;S.keys=0;S.good=0;S.order=[];S.state="countdown";S.fw=0;S.fa=100;
+  var multi=S.mode==="multi";
+  var ghost=DIFF[1];
+  S.racers=[{name:"YOU",cc:"YOU",p:0,wpm:0,col:COLS[0],you:true}];
+  if(multi){
+    S.racers.push({name:"FRIEND",cc:"P2P",p:0,wpm:0,col:COLS[1],remote:true});
+    S.racers.push({name:"GHOST BOT",cc:"AI",p:0,wpm:0,col:COLS[2],chars:0,lo:ghost.lo,hi:ghost.hi,cur:rnd(ghost.lo,ghost.hi),tgt:rnd(ghost.lo,ghost.hi),burst:0,mirror:S.role==="guest"});
+  }else{
+    S.racers.push({name:"BOT APEX",cc:"AI",p:0,wpm:0,col:COLS[1],chars:0,lo:d.lo,hi:d.hi,cur:rnd(d.lo,d.hi),tgt:rnd(d.lo,d.hi),burst:0});
+    S.racers.push({name:"BOT VOLT",cc:"AI",p:0,wpm:0,col:COLS[2],chars:0,lo:d.lo,hi:d.hi,cur:rnd(d.lo,d.hi),tgt:rnd(d.lo,d.hi),burst:0});
+  }
+  var tr=$("track");tr.classList.remove("racing");
+  Array.prototype.slice.call(tr.querySelectorAll(".lane")).forEach(function(l){l.remove()});
+  S.racers.forEach(function(r,i){
+    var l=document.createElement("div");l.className="lane";
+    l.innerHTML='<div class="lbl"><span class="flag">'+r.cc+'</span><b style="color:'+r.col.c+'">'+r.name+'</b><i id="lp'+i+'">0%</i></div><div class="car" id="car'+i+'" style="--p:0;--glow:'+r.col.c+'">'+carSVG(r.col,i)+'</div>';
+    tr.insertBefore(l,$("fin"));
+  });
+  drawFinish();
+  var tx=$("text");tx.innerHTML="";S.spans=[];
+  for(var i=0;i<S.text.length;i++){var s=document.createElement("span");s.textContent=S.text[i];tx.appendChild(s);S.spans.push(s)}
+  S.spans[0].className="cur";
+  $("vW").textContent="0";$("vA").textContent="100%";$("vT").textContent="0.0s";$("vP").textContent="0%";
+  $("modal").classList.remove("on");
+  show("game");
+  var n=3,cd=$("cd"),cn=$("cdn");
+  (function tick(){
+    cd.classList.add("on");cn.style.animation="none";void cn.offsetWidth;cn.style.animation="";
+    if(n>0){cn.textContent=n;cn.style.color="var(--cy)";n--;later(tick,1000)}
+    else{cn.textContent="RACE!";cn.style.color="var(--lm)";go();later(function(){cd.classList.remove("on")},800)}
+  })();
+}
+function go(){
+  S.state="racing";S.t0=performance.now();$("track").classList.add("racing");
+  every(botTick,100);every(updateStats,200);
+  if(S.mode==="multi")every(netTick,100);
+}
+
+/* ---------- Bot typing simulation ---------- */
+function botStep(b){
+  if(Math.random()<0.07)b.tgt=rnd(b.lo,b.hi);
+  if(b.burst<=0&&Math.random()<0.03){b.burst=ri(5,14);b.bm=Math.random()<.5?rnd(1.12,1.3):rnd(.6,.85)}
+  var m=1;if(b.burst>0){m=b.bm;b.burst--}
+  b.cur+=(b.tgt-b.cur)*0.2+(Math.random()-.5)*3;
+  b.cur=Math.max(b.lo,Math.min(b.hi,b.cur));
+  var w=Math.max(b.lo,Math.min(b.hi,b.cur*m));
+  b.chars+=w*5/60*0.1;b.wpm=w;
+  b.p=Math.min(1,b.chars/S.text.length);
+}
+function botTick(){
+  if(S.state!=="racing")return;
+  S.racers.forEach(function(r){if(r.chars!==undefined&&!r.mirror)botStep(r)});
+  render();checkEnd();
+}
+function render(){
+  S.racers.forEach(function(r,i){
+    var el=$("car"+i);if(!el)return;
+    el.style.setProperty("--p",r.p.toFixed(4));
+    $("lp"+i).textContent=Math.floor(r.p*100)+"%"+(r.wpm>0?" \u00b7 "+Math.round(r.wpm)+" WPM":"");
+  });
+  $("vP").textContent=Math.floor(S.racers[0].p*100)+"%";
+}
+function curWpm(){return S.idx>0?Math.round((S.idx/5)/Math.max((performance.now()-S.t0)/60000,1/600)):0}
+function curAcc(){return S.keys?Math.round(S.good/S.keys*100):100}
+function updateStats(){
+  if(S.state!=="racing")return;
+  var w=curWpm();S.racers[0].wpm=w;
+  $("vW").textContent=w;$("vA").textContent=curAcc()+"%";$("vT").textContent=((performance.now()-S.t0)/1000).toFixed(1)+"s";
+}
+
+/* ---------- Typing engine ---------- */
+function paint(){
+  for(var i=0;i<S.spans.length;i++){
+    var c=i<S.idx?"ok":(i===S.idx?(S.wrong?"bad":"cur"):"");
+    if(S.spans[i].className!==c)S.spans[i].className=c;
+  }
+}
+function shake(){var t=$("typeBox");t.classList.remove("shake");void t.offsetWidth;t.classList.add("shake")}
+function onKey(e){
+  if(e.key==="Escape"&&(S.state==="racing"||S.state==="countdown")){quit();return}
+  if(S.state!=="racing"||e.ctrlKey||e.metaKey||e.altKey)return;
+  var me=S.racers[0];
+  if(e.key==="Backspace"){e.preventDefault();if(S.wrong){S.wrong=false;paint()}return}
+  if(e.key.length!==1)return;
+  e.preventDefault();S.keys++;
+  if(S.wrong){shake();return}
+  if(e.key===S.text[S.idx]){
+    S.good++;S.idx++;me.p=S.idx/S.text.length;paint();render();
+    if(S.idx>=S.text.length){updateStats();if(S.mode==="multi")netTick();checkEnd()}
+  }else{S.wrong=true;paint();shake()}
+}
+document.addEventListener("keydown",onKey);
+
+/* ---------- Finish verification & podium ---------- */
+function checkEnd(){
+  if(S.state!=="racing")return;
+  var hit=false;
+  S.racers.forEach(function(r){if(r.p>=1&&S.order.indexOf(r)<0){S.order.push(r);hit=true}});
+  if(!hit)return;
+  S.state="finished";clearTimers();$("track").classList.remove("racing");
+  if(S.mode==="multi")netTick();
+  S.fw=curWpm();S.fa=curAcc();
+  S.racers.forEach(function(r){if(r.p>=1){r.p=1}});render();
+  later(showResults,900);
+}
+function showResults(){
+  var rank=S.racers.slice().sort(function(a,b){
+    if(b.p!==a.p)return b.p-a.p;
+    var oa=S.order.indexOf(a),ob=S.order.indexOf(b);
+    return (oa<0?99:oa)-(ob<0?99:ob);
+  });
+  var lab=["1ST","2ND","3RD"],h="";
+  rank.forEach(function(r,i){h+='<div class="row r'+(i+1)+'"><div class="rk">'+lab[i]+'</div><span class="flag">'+r.cc+'</span><div class="nm" style="color:'+r.col.c+'">'+r.name+'</div><div class="pc">'+Math.floor(r.p*100)+'%</div></div>'});
+  $("podium").innerHTML=h;
+  var won=rank[0]===S.racers[0];
+  $("mTitle").textContent=won?"Victory!":"Race Finished";
+  $("mSub").textContent=won?"You crossed the line first":"You placed "+lab[rank.indexOf(S.racers[0])];
+  $("rW").textContent=S.fw;$("rA").textContent=S.fa+"%";
+  $("bAgain").textContent=S.mode==="multi"?"Rematch":"Retry";
+  $("modal").classList.add("on");
+}
+function quit(){
+  clearTimers();S.state="idle";$("cd").classList.remove("on");$("track").classList.remove("racing");$("modal").classList.remove("on");
+  closeConn();show("home");
+}
+
+/* ---------- WebRTC peer-to-peer ---------- */
+function mkPC(useStun){
+  closeConn();
+  var cfg={iceServers:useStun?[{urls:"stun:stun.l.google.com:19302"}]:[]};
+  var pc=new RTCPeerConnection(cfg);
+  pc.onconnectionstatechange=function(){
+    var st=pc.connectionState;
+    if(st==="failed"||st==="disconnected"||st==="closed")onLost();
+  };
+  NET.pc=pc;return pc;
+}
+function waitICE(pc){
+  return new Promise(function(res){
+    if(pc.iceGatheringState==="complete"){res();return}
+    var done=false;function fin(){if(!done){done=true;res()}}
+    pc.addEventListener("icegatheringstatechange",function(){if(pc.iceGatheringState==="complete")fin()});
+    setTimeout(fin,5000);
+  });
+}
+function enc(d){return btoa(JSON.stringify({type:d.type,sdp:d.sdp}))}
+function dec(s){return JSON.parse(atob(s.replace(/\s+/g,"")))}
+function wireChannel(ch,role){
+  NET.ch=ch;
+  ch.onopen=function(){
+    if(role==="host"){$("hStat").textContent="Connected! Friend is ready.";$("hStat").classList.add("ok");$("hStart").disabled=false}
+    else{$("gStat").textContent="Connected! Waiting for the host to start the race...";$("gStat").classList.add("ok")}
+  };
+  ch.onclose=onLost;
+  ch.onmessage=onMsg;
+}
+function hostGen(){
+  var pc=mkPC($("stunH").checked);S.role="host";
+  wireChannel(pc.createDataChannel("race",{ordered:true}),"host");
+  $("hStat").textContent="Generating offer...";$("hStat").classList.remove("ok");$("hStart").disabled=true;
+  pc.createOffer().then(function(o){return pc.setLocalDescription(o)}).then(function(){return waitICE(pc)}).then(function(){
+    $("hOffer").value=enc(pc.localDescription);$("hStat").textContent="Offer ready. Send it to your friend, then paste their answer below.";
+  }).catch(function(e){$("hStat").textContent="Error: "+e.message});
+}
+function hostConnect(){
+  if(!NET.pc||!NET.pc.localDescription){toast("Generate an offer first");return}
+  var v=$("hAns").value.trim();if(!v){toast("Paste the answer string first");return}
+  try{
+    NET.pc.setRemoteDescription(new RTCSessionDescription(dec(v))).then(function(){$("hStat").textContent="Connecting..."}).catch(function(e){$("hStat").textContent="Error: "+e.message});
+  }catch(e){$("hStat").textContent="Invalid answer string"}
+}
+function guestGen(){
+  var v=$("gOffer").value.trim();if(!v){toast("Paste the host's offer first");return}
+  var offer;try{offer=dec(v)}catch(e){$("gStat").textContent="Invalid offer string";return}
+  var pc=mkPC($("stunG").checked);S.role="guest";
+  pc.ondatachannel=function(ev){wireChannel(ev.channel,"guest")};
+  $("gStat").textContent="Generating answer...";$("gStat").classList.remove("ok");
+  pc.setRemoteDescription(new RTCSessionDescription(offer)).then(function(){return pc.createAnswer()}).then(function(a){return pc.setLocalDescription(a)}).then(function(){return waitICE(pc)}).then(function(){
+    $("gAns").value=enc(pc.localDescription);$("gStat").textContent="Answer ready. Send it to the host - connection starts automatically.";
+  }).catch(function(e){$("gStat").textContent="Error: "+e.message});
+}
+function send(o){if(chOpen()){try{NET.ch.send(JSON.stringify(o))}catch(e){}}}
+function netTick(){
+  if(S.state!=="racing"&&S.state!=="finished")return;
+  var o={t:"pos",p:S.racers[0].p,w:curWpm(),a:curAcc()};
+  if(S.role==="host"){o.b=S.racers[2].p;o.bw=S.racers[2].wpm}
+  send(o);
+}
+function onMsg(ev){
+  var m;try{m=JSON.parse(ev.data)}catch(e){return}
+  if(m.t==="start"){S.mode="multi";S.diff=1;startRace(m.ti)}
+  else if(m.t==="pos"&&S.state==="racing"){
+    S.racers[1].p=Math.max(0,Math.min(1,+m.p||0));S.racers[1].wpm=+m.w||0;
+    if(S.role==="guest"&&typeof m.b==="number"){S.racers[2].p=Math.min(1,m.b);S.racers[2].wpm=+m.bw||0}
+    render();checkEnd();
+  }
+}
+function hostStart(){
+  if(!chOpen()){toast("No connected player");return}
+  var ti=ri(0,TEXTS.length-1);S.mode="multi";S.role="host";
+  send({t:"start",ti:ti});startRace(ti);
+}
+function onLost(){
+  if(!NET.pc&&!NET.ch)return;
+  var was=S.mode==="multi"&&(S.state==="racing"||S.state==="countdown");
+  closeConn();
+  $("hStat").textContent="Not connected";$("hStat").classList.remove("ok");$("hStart").disabled=true;
+  $("gStat").textContent="Not connected";$("gStat").classList.remove("ok");
+  if(was){clearTimers();S.state="idle";$("cd").classList.remove("on");$("track").classList.remove("racing");show("home");toast("Opponent disconnected")}
+}
+function closeConn(){
+  var c=NET.ch,p=NET.pc;NET.ch=null;NET.pc=null;
+  if(c){c.onclose=null;c.onmessage=null;try{c.close()}catch(e){}}
+  if(p){p.onconnectionstatechange=null;try{p.close()}catch(e){}}
+  S.role=null;
+}
+
+/* ---------- UI wiring ---------- */
+function updDiff(){
+  S.diff=+$("dRange").value;var d=DIFF[S.diff];
+  $("dDesc").textContent=d.n+" \u2014 opponents type "+d.lo+"\u2013"+d.hi+" WPM";
+  Array.prototype.forEach.call($("dLbl").children,function(s,i){s.classList.toggle("on",i===S.diff)});
+}
+$("dRange").addEventListener("input",updDiff);updDiff();
+$("bSolo").addEventListener("click",function(){show("solo")});
+$("dGo").addEventListener("click",function(){S.mode="solo";S.role=null;startRace(ri(0,TEXTS.length-1))});
+$("bHost").addEventListener("click",function(){closeConn();$("hOffer").value="";$("hAns").value="";$("hStat").textContent="Not connected";$("hStat").classList.remove("ok");$("hStart").disabled=true;show("host")});
+$("bJoin").addEventListener("click",function(){closeConn();$("gOffer").value="";$("gAns").value="";$("gStat").textContent="Not connected";$("gStat").classList.remove("ok");show("join")});
+$("hGen").addEventListener("click",hostGen);
+$("hConn").addEventListener("click",hostConnect);
+$("hCopy").addEventListener("click",function(){copyTxt($("hOffer").value)});
+$("hStart").addEventListener("click",hostStart);
+$("gGen").addEventListener("click",guestGen);
+$("gCopy").addEventListener("click",function(){copyTxt($("gAns").value)});
+Array.prototype.forEach.call(document.querySelectorAll("[data-home]"),function(b){b.addEventListener("click",function(){closeConn();show("home")})});
+$("bAgain").addEventListener("click",function(){
+  $("modal").classList.remove("on");
+  if(S.mode==="multi"&&chOpen()){
+    if(S.role==="host"){show("host");$("hStart").disabled=false}
+    else{show("join");$("gStat").textContent="Connected! Waiting for the host to start the next race..."}
+  }else if(S.mode==="solo"){startRace(ri(0,TEXTS.length-1))}
+  else{closeConn();show("home")}
+});
+$("bMenu").addEventListener("click",quit);
+$("wMin").addEventListener("click",function(){if(ipc)ipc.send("win-min")});
+$("wClose").addEventListener("click",function(){if(ipc)ipc.send("win-close");else window.close()});
+drawFinish();
+})();
+</script>
+</body>
+</html>
