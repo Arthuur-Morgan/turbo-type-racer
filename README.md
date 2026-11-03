@@ -52,7 +52,7 @@ Build the standalone 64-bit Windows app:
 npm run package-win
 ```
 
-The output is `dist/TurboTypeRacer-win32-x64/TurboTypeRacer.exe`. GitHub Actions runs the tests and stores a Windows build artifact for 14 days on pushes, pull requests, and manual runs.
+The executable is `dist/TurboTypeRacer-win32-x64/TurboTypeRacer.exe`. GitHub Actions runs the tests and packages the Windows app on pushes, pull requests, and manual runs. Download the `TurboTypeRacer-windows-x64` artifact from a successful run to get a ZIP containing the complete app folder. Extract it, then launch `TurboTypeRacer.exe` inside the extracted folder; keep the other files alongside it. Artifacts are available for 14 days.
 
 ## Controls
 
