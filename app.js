@@ -139,9 +139,14 @@ function updateStats(){
 /* ---------- Typing engine ---------- */
 function paint(){
   for(var i=0;i<S.spans.length;i++){
-    var c=i<S.idx?"ok":(i===S.idx?(S.wrong?"bad":"cur"):"");
+    var c=i<S.idx?"done":(i===S.idx?(S.wrong?"current error":"current"):"upcoming");
     if(S.spans[i].className!==c)S.spans[i].className=c;
   }
+  $("typedCount").textContent=S.idx;
+  $("currentKey").textContent=S.idx<S.text.length?(S.text[S.idx]===" "?"SPACE":S.text[S.idx]):"FINISH";
+  $("nextPreview").textContent=S.idx+1<S.text.length?(S.text[S.idx+1]===" "?"SPACE":S.text[S.idx+1]):"—";
+  $("mistakeHint").textContent=S.wrong?"CLEAR THE RED KEY":"ON LINE";
+  $("mistakeHint").classList.toggle("error",S.wrong);
 }
 function shake(){var t=$("typeBox");t.classList.remove("shake");void t.offsetWidth;t.classList.add("shake")}
 function onKey(e){

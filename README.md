@@ -9,7 +9,8 @@ A desktop typing racer built with Electron. Its visual direction takes cues from
 - Start in fullscreen, with F11 to switch between fullscreen and a window.
 - Race two AI drivers at Beginner, Normal, or Expert difficulty.
 - Choose among 36 original passages across roads, nature, science, travel, everyday life, craft, and history.
-- Hear an original, quiet ambient tone generated locally with Web Audio. Sound begins after your first click (to respect desktop audio activation rules), can be turned off from the top bar, and remembers your choice on this device.
+- Hear the bundled CC0 `Safe Space` loop by Tsorthan Grove. Sound begins after your first click (to respect desktop audio activation rules), can be turned off from the top bar, and remembers your choice on this device.
+- Read a game-style typing HUD that separates completed characters, the exact current key, the next key, and a visible error state.
 - Play a friend directly over WebRTC using manual offer and answer exchange; no game server or account is required.
 - Finish results wait for both human racers. The host also simulates and synchronizes the podium's ghost bot.
 - Track personal race count, wins, best WPM, best accuracy, and selected difficulty on this device using browser local storage.
@@ -21,7 +22,8 @@ turbo-type-racer/
 ├── .github/workflows/ci.yml  # Unit checks and Windows packaging artifact
 ├── .github/workflows/release.yml # Windows ZIP and GitHub Release publishing
 ├── app.js                    # UI, typing, AI, race and WebRTC coordination
-├── audio-engine.js           # Locally generated ambient sound
+├── audio-engine.js           # Bundled loop playback and sound preference
+├── audio/safe_space_loop.flac # CC0 loop from OpenGameArt
 ├── game-core.js              # Pure gameplay calculations shared with tests
 ├── index.html                # Semantic interface and content security policy
 ├── main.js                   # Electron lifecycle and window controls
@@ -72,6 +74,10 @@ The executable is `dist/TurboTypeRacer-win32-x64/TurboTypeRacer.exe`. On a versi
 The host generates an offer and sends it to the guest. The guest creates an answer and sends it back; the host pastes the answer and connects. Both players must choose the same STUN setting. Enable the public Google STUN option when playing across the internet; it is not required for many LAN connections.
 
 WebRTC can reveal network connection details to the other peer. This app keeps Chromium's local-IP obfuscation enabled. LAN connectivity can depend on the browser's mDNS candidate support and network configuration. STUN helps with some NAT configurations but does not guarantee a connection through every firewall or symmetric NAT. The signaling offer and answer are not encrypted by this app before you share them, so exchange them privately with the intended player.
+
+## Audio credit
+
+`safe_space_loop.flac` is “Safe Space” by Tsorthan Grove, released under CC0 / public domain on [OpenGameArt](https://opengameart.org/content/safe-space-0). The game bundles the loop locally and does not stream it at runtime.
 
 ## Local records and privacy
 

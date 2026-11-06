@@ -1,6 +1,6 @@
 {
   "name": "turbo-type-racer",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Cyberpunk car racing typing game with AI opponents and WebRTC peer-to-peer multiplayer.",
   "main": "main.js",
   "author": "Dipayan Bhanja",
