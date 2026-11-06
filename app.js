@@ -37,15 +37,15 @@ function renderProfile(){
 /* ---------- Car art (inline SVG) ---------- */
 function carSVG(col,id){
   return '<svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col.c+'"/><stop offset="1" stop-color="'+col.c+'" stop-opacity=".55"/></linearGradient><radialGradient id="r'+id+'"><stop offset="0" stop-color="#ddd"/><stop offset="1" stop-color="#666"/></radialGradient></defs>'+
-  '<g fill="#0b0b10" stroke="#555"><rect x="18" y="1" width="20" height="9" rx="3"/><rect x="18" y="46" width="20" height="9" rx="3"/><rect x="80" y="1" width="20" height="9" rx="3"/><rect x="80" y="46" width="20" height="9" rx="3"/></g>'+
+  '<g fill="#1c3028" stroke="#555"><rect x="18" y="1" width="20" height="9" rx="3"/><rect x="18" y="46" width="20" height="9" rx="3"/><rect x="80" y="1" width="20" height="9" rx="3"/><rect x="80" y="46" width="20" height="9" rx="3"/></g>'+
   '<g fill="url(#r'+id+')"><rect x="22" y="3" width="12" height="4" rx="2"/><rect x="22" y="49" width="12" height="4" rx="2"/><rect x="84" y="3" width="12" height="4" rx="2"/><rect x="84" y="49" width="12" height="4" rx="2"/></g>'+
   '<rect x="0" y="9" width="9" height="38" rx="2" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/><rect x="8" y="22" width="6" height="12" fill="#222"/>'+
   '<path d="'+BODY[col.m]+'" fill="url(#g'+id+')" stroke="#fff" stroke-opacity=".7" stroke-width="1.2"/>'+
   '<rect x="26" y="24.5" width="88" height="3" fill="'+col.c2+'"/><rect x="26" y="29.5" width="88" height="3" fill="'+col.c2+'"/>'+
-  '<path d="M52 17 L76 14 L84 28 L76 42 L52 39 L60 28Z" fill="#071522" stroke="#9fe" stroke-opacity=".6"/><path d="M64 18 L74 16.5 L79 24 L68 24Z" fill="#fff" opacity=".25"/>'+
+  '<path d="M52 17 L76 14 L84 28 L76 42 L52 39 L60 28Z" fill="#243d33" stroke="#bd8b45" stroke-opacity=".6"/><path d="M64 18 L74 16.5 L79 24 L68 24Z" fill="#fff" opacity=".25"/>'+
   '<path d="M30 14 L44 15 L44 41 L30 42" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="1.5"/>'+
   '<path d="M80 9 L88 3 L90 7 L84 12Z" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/><path d="M80 47 L88 53 L90 49 L84 44Z" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/>'+
-  '<ellipse cx="112" cy="16" rx="4" ry="2.6" fill="#fffbd0"/><ellipse cx="112" cy="40" rx="4" ry="2.6" fill="#fffbd0"/><rect x="2" y="12" width="3" height="5" fill="#ff1744"/><rect x="2" y="39" width="3" height="5" fill="#ff1744"/></svg>';
+  '<ellipse cx="112" cy="16" rx="4" ry="2.6" fill="#fffbd0"/><ellipse cx="112" cy="40" rx="4" ry="2.6" fill="#fffbd0"/><rect x="2" y="12" width="3" height="5" fill="#bd512e"/><rect x="2" y="39" width="3" height="5" fill="#bd512e"/></svg>';
 }
 function drawFinish(){
   var c=$("fin"),x=c.getContext("2d"),s=8;
@@ -94,8 +94,8 @@ function startRace(ti){
   var n=3,cd=$("cd"),cn=$("cdn");
   (function tick(){
     cd.classList.add("on");cn.style.animation="none";void cn.offsetWidth;cn.style.animation="";
-    if(n>0){cn.textContent=n;cn.style.color="var(--cy)";n--;later(tick,1000)}
-    else{cn.textContent="RACE!";cn.style.color="var(--lm)";go();later(function(){cd.classList.remove("on")},800)}
+    if(n>0){cn.textContent=n;cn.style.color="var(--rust)";n--;later(tick,1000)}
+    else{cn.textContent="RACE!";cn.style.color="var(--forest)";go();later(function(){cd.classList.remove("on")},800)}
   })();
 }
 function go(){

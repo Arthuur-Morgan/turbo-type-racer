@@ -29,6 +29,15 @@
         tone.type = 'sine';
         tone.frequency.value = frequency;
         level.gain.value = [0.36, 0.19, 0.09][index];
+        var drift = context.createOscillator();
+        var driftDepth = context.createGain();
+        drift.type = 'sine';
+        drift.frequency.value = [0.035, 0.027, 0.021][index];
+        driftDepth.gain.value = 0.018;
+        drift.connect(driftDepth);
+        driftDepth.connect(level.gain);
+        drift.start();
+        oscillators.push(drift);
         tone.connect(level);
         level.connect(filter);
         tone.start();
