@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' stun:; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src 'self' stun:; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Turbo Type Racer</title>
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -72,8 +72,9 @@
   </div>
   <div class="track" id="track" role="img" aria-label="Race track with player and opponent positions"><canvas id="fin" width="32" height="276" aria-hidden="true"></canvas></div>
   <div class="type glass" id="typeBox"><div class="passage-heading"><p class="eyebrow" id="passageTheme">ROAD NOTES / 01</p><h2 id="passageTitle">A clear line</h2></div>
+    <div class="typing-hud" aria-live="polite"><span><b id="typedCount">0</b> COMPLETED</span><span class="current-readout">CURRENT <b id="currentKey">—</b></span><span>NEXT <b id="nextPreview">—</b></span><span id="mistakeHint">READY</span></div>
     <div id="text" class="mono"></div>
-    <div class="hint">Type the text above. Fix typos with BACKSPACE before continuing. &nbsp;|&nbsp; ESC to quit.</div>
+    <div class="hint">The green rail is your completed line. The amber marker is the key you need now. Upcoming text stays dim until it is yours. &nbsp;|&nbsp; BACKSPACE clears a mistake &nbsp;|&nbsp; ESC quits.</div>
   </div>
 </section>
 
