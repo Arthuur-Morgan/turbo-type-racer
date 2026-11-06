@@ -2,14 +2,9 @@
 (function(){
 "use strict";
 var gameAPI=window.gameAPI;
-var TEXTS=[
-"The engine roars to life as the green light flashes across the starting grid. Every keystroke is a shift of gear, every word a corner taken at full speed. Stay calm, keep your fingers fast, and let the rhythm carry you toward the checkered flag.",
-"Under the neon skyline the highway stretches into the night, glowing with streaks of cyan and pink. Precision beats panic on every straight, so breathe steadily, correct each mistake, and push the throttle when the road opens up ahead of you.",
-"Champions are not born at the finish line but made in the quiet hours of practice. Each accurate letter builds momentum, each clean sentence widens the gap, and the fastest driver is always the one who never lifts off the pedal.",
-"Rain hammers the asphalt while the pack screams through the final chicane. Heart pounding and hands steady, you read the road ahead like a sentence you have typed a thousand times, and the finish line rushes forward to meet you."
-];
+var TEXTS=window.TypeRacerPassages;
 var DIFF=[{n:"Beginner",lo:30,hi:45},{n:"Normal",lo:55,hi:70},{n:"Expert",lo:85,hi:105}];
-var COLS=[{c:"#00f0ff",c2:"#ff2d95",m:0},{c:"#ff2d95",c2:"#ffffff",m:1},{c:"#9dff00",c2:"#0a0a0a",m:2}];
+var COLS=[{c:"#294238",c2:"#bd512e",m:0},{c:"#bd512e",c2:"#f8f5ed",m:1},{c:"#bd8b45",c2:"#1c3028",m:2}];
 var BODY=[
 "M6 28 C6 16 14 12 30 10 L84 8 C104 8 116 20 116 28 C116 36 104 48 84 48 L30 46 C14 44 6 40 6 28Z",
 "M4 28 C4 14 20 10 40 10 L88 11 C110 12 118 22 118 28 C118 34 110 44 88 45 L40 46 C20 46 4 42 4 28Z",
@@ -17,8 +12,9 @@ var BODY=[
 var $=function(i){return document.getElementById(i)};
 function rnd(a,b){return a+Math.random()*(b-a)}
 function ri(a,b){return Math.floor(rnd(a,b+1))}
-var S={mode:"solo",role:null,diff:1,state:"idle",text:"",spans:[],idx:0,wrong:false,keys:0,good:0,t0:0,racers:[],timers:[],order:[],fw:0,fa:100,finishReported:false,finalOrder:null};
+var S={mode:"solo",role:null,diff:1,state:"idle",text:"",passage:null,spans:[],idx:0,wrong:false,keys:0,good:0,t0:0,racers:[],timers:[],order:[],fw:0,fa:100,finishReported:false,finalOrder:null};
 var NET={pc:null,ch:null};
+var lastPassageIndex=-1;
 var PROFILE_KEY="turbo-type-racer-profile-v1";
 var profile=loadProfile();
 
@@ -41,19 +37,19 @@ function renderProfile(){
 /* ---------- Car art (inline SVG) ---------- */
 function carSVG(col,id){
   return '<svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+col.c+'"/><stop offset="1" stop-color="'+col.c+'" stop-opacity=".55"/></linearGradient><radialGradient id="r'+id+'"><stop offset="0" stop-color="#ddd"/><stop offset="1" stop-color="#666"/></radialGradient></defs>'+
-  '<g fill="#0b0b10" stroke="#555"><rect x="18" y="1" width="20" height="9" rx="3"/><rect x="18" y="46" width="20" height="9" rx="3"/><rect x="80" y="1" width="20" height="9" rx="3"/><rect x="80" y="46" width="20" height="9" rx="3"/></g>'+
+  '<g fill="#1c3028" stroke="#555"><rect x="18" y="1" width="20" height="9" rx="3"/><rect x="18" y="46" width="20" height="9" rx="3"/><rect x="80" y="1" width="20" height="9" rx="3"/><rect x="80" y="46" width="20" height="9" rx="3"/></g>'+
   '<g fill="url(#r'+id+')"><rect x="22" y="3" width="12" height="4" rx="2"/><rect x="22" y="49" width="12" height="4" rx="2"/><rect x="84" y="3" width="12" height="4" rx="2"/><rect x="84" y="49" width="12" height="4" rx="2"/></g>'+
   '<rect x="0" y="9" width="9" height="38" rx="2" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/><rect x="8" y="22" width="6" height="12" fill="#222"/>'+
   '<path d="'+BODY[col.m]+'" fill="url(#g'+id+')" stroke="#fff" stroke-opacity=".7" stroke-width="1.2"/>'+
   '<rect x="26" y="24.5" width="88" height="3" fill="'+col.c2+'"/><rect x="26" y="29.5" width="88" height="3" fill="'+col.c2+'"/>'+
-  '<path d="M52 17 L76 14 L84 28 L76 42 L52 39 L60 28Z" fill="#071522" stroke="#9fe" stroke-opacity=".6"/><path d="M64 18 L74 16.5 L79 24 L68 24Z" fill="#fff" opacity=".25"/>'+
+  '<path d="M52 17 L76 14 L84 28 L76 42 L52 39 L60 28Z" fill="#243d33" stroke="#bd8b45" stroke-opacity=".6"/><path d="M64 18 L74 16.5 L79 24 L68 24Z" fill="#fff" opacity=".25"/>'+
   '<path d="M30 14 L44 15 L44 41 L30 42" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="1.5"/>'+
   '<path d="M80 9 L88 3 L90 7 L84 12Z" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/><path d="M80 47 L88 53 L90 49 L84 44Z" fill="'+col.c2+'" stroke="#000" stroke-opacity=".5"/>'+
-  '<ellipse cx="112" cy="16" rx="4" ry="2.6" fill="#fffbd0"/><ellipse cx="112" cy="40" rx="4" ry="2.6" fill="#fffbd0"/><rect x="2" y="12" width="3" height="5" fill="#ff1744"/><rect x="2" y="39" width="3" height="5" fill="#ff1744"/></svg>';
+  '<ellipse cx="112" cy="16" rx="4" ry="2.6" fill="#fffbd0"/><ellipse cx="112" cy="40" rx="4" ry="2.6" fill="#fffbd0"/><rect x="2" y="12" width="3" height="5" fill="#bd512e"/><rect x="2" y="39" width="3" height="5" fill="#bd512e"/></svg>';
 }
 function drawFinish(){
   var c=$("fin"),x=c.getContext("2d"),s=8;
-  for(var yy=0;yy<Math.ceil(c.height/s);yy++)for(var xx=0;xx<Math.ceil(c.width/s);xx++){x.fillStyle=((xx+yy)%2)?"#000":"#fff";x.fillRect(xx*s,yy*s,s,s)}
+  for(var yy=0;yy<Math.ceil(c.height/s);yy++)for(var xx=0;xx<Math.ceil(c.width/s);xx++){x.fillStyle=((xx+yy)%2)?"#294238":"#f8f5ed";x.fillRect(xx*s,yy*s,s,s)}
 }
 
 /* ---------- Helpers ---------- */
@@ -64,12 +60,13 @@ function every(f,ms){var t=setInterval(f,ms);S.timers.push(t);return t}
 function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(toast.h);toast.h=setTimeout(function(){t.style.display="none"},3500)}
 function copyTxt(v){if(!v)return;try{var result=gameAPI?gameAPI.copyText(v):navigator.clipboard.writeText(v);Promise.resolve(result).then(function(){toast("Copied to clipboard")}).catch(function(){toast("Copy failed - select the text manually")})}catch(e){toast("Copy failed - select the text manually")}}
 function chOpen(){return NET.ch&&NET.ch.readyState==="open"}
+function pickPassageIndex(){var theme=$("themeSelect")?$("themeSelect").value:"All";var choices=[];TEXTS.forEach(function(item,index){if(theme==="All"||item.theme===theme)choices.push(index)});if(!choices.length)return 0;var available=choices.filter(function(index){return index!==lastPassageIndex});var index=available[ri(0,available.length-1)];lastPassageIndex=index;return index;}
 
 /* ---------- Race setup ---------- */
 function startRace(ti){
   clearTimers();
   var d=DIFF[S.diff];
-  S.text=TEXTS[ti%TEXTS.length];S.idx=0;S.wrong=false;S.keys=0;S.good=0;S.order=[];S.state="countdown";S.fw=0;S.fa=100;S.finishReported=false;S.finalOrder=null;
+  S.passage=TEXTS[ti%TEXTS.length];S.text=S.passage.text;$("passageTitle").textContent=S.passage.title;$("passageTheme").textContent=S.passage.theme.toUpperCase()+" / "+String(ti+1).padStart(2,"0");S.idx=0;S.wrong=false;S.keys=0;S.good=0;S.order=[];S.state="countdown";S.fw=0;S.fa=100;S.finishReported=false;S.finalOrder=null;
   var multi=S.mode==="multi";
   var ghost=DIFF[1];
   S.racers=[{name:"YOU",cc:"YOU",p:0,wpm:0,col:COLS[0],you:true}];
@@ -97,8 +94,8 @@ function startRace(ti){
   var n=3,cd=$("cd"),cn=$("cdn");
   (function tick(){
     cd.classList.add("on");cn.style.animation="none";void cn.offsetWidth;cn.style.animation="";
-    if(n>0){cn.textContent=n;cn.style.color="var(--cy)";n--;later(tick,1000)}
-    else{cn.textContent="RACE!";cn.style.color="var(--lm)";go();later(function(){cd.classList.remove("on")},800)}
+    if(n>0){cn.textContent=n;cn.style.color="var(--rust)";n--;later(tick,1000)}
+    else{cn.textContent="RACE!";cn.style.color="var(--forest)";go();later(function(){cd.classList.remove("on")},800)}
   })();
 }
 function go(){
@@ -292,7 +289,7 @@ function onMsg(ev){
 }
 function hostStart(){
   if(!chOpen()){toast("No connected player");return}
-  var ti=ri(0,TEXTS.length-1);S.mode="multi";S.role="host";
+  var ti=pickPassageIndex();S.mode="multi";S.role="host";
   send({t:"start",ti:ti});startRace(ti);
 }
 function onLost(){
@@ -318,7 +315,7 @@ function updDiff(){
 }
 $("dRange").addEventListener("input",function(){updDiff();profile.difficulty=S.diff;saveProfile()});updDiff();renderProfile();
 $("bSolo").addEventListener("click",function(){show("solo")});
-$("dGo").addEventListener("click",function(){S.mode="solo";S.role=null;startRace(ri(0,TEXTS.length-1))});
+$("dGo").addEventListener("click",function(){S.mode="solo";S.role=null;startRace(pickPassageIndex())});
 $("bHost").addEventListener("click",function(){closeConn();$("hOffer").value="";$("hAns").value="";$("hStat").textContent="Not connected";$("hStat").classList.remove("ok");$("hStart").disabled=true;show("host")});
 $("bJoin").addEventListener("click",function(){closeConn();$("gOffer").value="";$("gAns").value="";$("gStat").textContent="Not connected";$("gStat").classList.remove("ok");show("join")});
 $("hGen").addEventListener("click",hostGen);
@@ -333,11 +330,12 @@ $("bAgain").addEventListener("click",function(){
   if(S.mode==="multi"&&chOpen()){
     if(S.role==="host"){show("host");$("hStart").disabled=false}
     else{show("join");$("gStat").textContent="Connected! Waiting for the host to start the next race..."}
-  }else if(S.mode==="solo"){startRace(ri(0,TEXTS.length-1))}
+  }else if(S.mode==="solo"){startRace(pickPassageIndex())}
   else{closeConn();show("home")}
 });
 $("bMenu").addEventListener("click",quit);
 $("wMin").addEventListener("click",function(){if(gameAPI)gameAPI.minimize()});
 $("wClose").addEventListener("click",function(){if(gameAPI)gameAPI.close()});
 drawFinish();
+var soundButton=$("soundToggle");function renderSoundButton(){var on=window.RaceSound.isEnabled();soundButton.textContent=on?"SOUND ON":"SOUND OFF";soundButton.setAttribute("aria-pressed",String(on));soundButton.setAttribute("aria-label",on?"Turn ambient sound off":"Turn ambient sound on")}soundButton.addEventListener("click",function(){window.RaceSound.setEnabled(!window.RaceSound.isEnabled());renderSoundButton()});document.addEventListener("pointerdown",function(){if(window.RaceSound.isEnabled())window.RaceSound.start()},{once:true});renderSoundButton();
 })();

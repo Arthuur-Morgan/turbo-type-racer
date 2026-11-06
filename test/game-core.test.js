@@ -3,6 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const core = require('../game-core');
+const passages = require('../passages');
 
 test('accuracy is 100 percent before the first key and penalizes each counted mistake', () => {
   assert.equal(core.accuracy(0, 0), 100);
@@ -35,4 +36,14 @@ test('finish times produce one stable podium when racers have crossed', () => {
     { id: 'ghost', progress: 0.8, orderIndex: 2 }
   ]);
   assert.deepEqual(ranked.map((racer) => racer.id), ['host', 'guest', 'ghost']);
+});
+
+test('typing library offers varied original passages with valid titles and themes', () => {
+  assert.ok(passages.length >= 30);
+  assert.equal(new Set(passages.map((passage) => passage.title)).size, passages.length);
+  assert.deepEqual(new Set(passages.map((passage) => passage.theme)), new Set(['Roads', 'Nature', 'Science', 'Travel', 'Everyday', 'Craft', 'History']));
+  for (const passage of passages) {
+    assert.ok(passage.text.split(/\s+/).length >= 35, `${passage.title} should provide a full typing passage`);
+    assert.ok(passage.title && passage.text);
+  }
 });

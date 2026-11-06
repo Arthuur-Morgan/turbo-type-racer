@@ -11,11 +11,12 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    show: false,
     minWidth: 900,
     minHeight: 650,
     frame: false,              // borderless; the game draws its own title bar
     autoHideMenuBar: true,
-    backgroundColor: '#07070f',
+    backgroundColor: '#eee9dd',
     title: 'Turbo Type Racer',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
@@ -26,6 +27,10 @@ function createWindow() {
   });
 
   mainWindow.setMenuBarVisibility(false);
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.setFullScreen(true);
+    mainWindow.show();
+  });
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   // F11 toggles fullscreen
