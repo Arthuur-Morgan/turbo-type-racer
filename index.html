@@ -8,23 +8,23 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div class="tb"><span>TURBO TYPE RACER</span><div><button id="wMin" title="Minimize" aria-label="Minimize window">&#8212;</button><button id="wClose" title="Close" aria-label="Close window">&#215;</button></div></div>
+<header class="tb"><span class="brand-mark">TTR</span><span class="tb-title">TURBO TYPE RACER <small>DRIVER TRAINING / 01</small></span><div class="tb-actions"><button id="soundToggle" class="sound-toggle" type="button" aria-pressed="true" title="Toggle ambient sound">SOUND ON</button><button id="wMin" title="Minimize" aria-label="Minimize window">&#8212;</button><button id="wClose" title="Close" aria-label="Close window">&#215;</button></div></header>
 
 <section id="home" class="screen on">
-  <div><h1 class="logo">Turbo Type Racer</h1><p class="sub">Type fast &bull; Drive faster</p></div>
-  <div class="profile glass" aria-label="Your local records">
+  <div class="home-heading"><p class="eyebrow">THE OPEN ROAD IS YOURS</p><h1 class="logo">Turbo Type<br><em>Racer.</em></h1><p class="sub">A measured hand. A clear mind. A faster line.</p></div>
+  <div class="profile glass" aria-label="Your local records"><p class="section-kicker">YOUR RECORD</p>
     <span>Races <b id="profileRaces">0</b></span><span>Wins <b id="profileWins">0</b></span><span>Best speed <b id="profileBest">0 WPM</b></span><span>Best accuracy <b id="profileAccuracy">0%</b></span>
   </div>
   <div class="modes">
-    <button class="mode a glass" id="bSolo"><span class="tag">SOLO</span><h2>Single Player</h2><p>Race two AI drivers. Pick Beginner, Normal or Expert.</p></button>
-    <button class="mode b glass" id="bHost"><span class="tag">P2P</span><h2>Host Game</h2><p>Create a direct WebRTC connection string and share it with a friend.</p></button>
-    <button class="mode c glass" id="bJoin"><span class="tag">P2P</span><h2>Join Game</h2><p>Paste your friend's offer string and send back an answer string.</p></button>
+    <button class="mode a glass" id="bSolo"><span class="tag">01 / SOLO</span><h2>Time trial</h2><p>Find your rhythm against two paced rivals. Choose a route and a challenge.</p><span class="mode-arrow" aria-hidden="true">&#8599;</span></button>
+    <button class="mode b glass" id="bHost"><span class="tag">02 / HOST</span><h2>Invite a driver</h2><p>Set up a direct race with a friend using a private connection code.</p><span class="mode-arrow" aria-hidden="true">&#8599;</span></button>
+    <button class="mode c glass" id="bJoin"><span class="tag">03 / JOIN</span><h2>Join the grid</h2><p>Enter your friend's connection code and line up at the start.</p><span class="mode-arrow" aria-hidden="true">&#8599;</span></button>
   </div>
 </section>
 
 <section id="solo" class="screen">
   <div class="panel glass">
-    <h2>Difficulty</h2>
+    <p class="eyebrow">SOLO SESSION / SETUP</p><h2>Choose your pace</h2><label for="themeSelect">Passage collection</label><select id="themeSelect" aria-label="Passage collection"><option value="All">All routes &amp; stories</option><option>Roads</option><option>Nature</option><option>Science</option><option>Travel</option><option>Everyday</option><option>Craft</option><option>History</option></select>
     <input type="range" id="dRange" min="0" max="2" step="1" value="1" aria-label="Opponent difficulty">
     <div class="dl" id="dLbl"><span>BEGINNER</span><span>NORMAL</span><span>EXPERT</span></div>
     <div id="dDesc"></div>
@@ -71,7 +71,7 @@
     <div class="stat glass"><small>Progress</small><b id="vP">0%</b></div>
   </div>
   <div class="track" id="track" role="img" aria-label="Race track with player and opponent positions"><canvas id="fin" width="32" height="276" aria-hidden="true"></canvas></div>
-  <div class="type glass" id="typeBox">
+  <div class="type glass" id="typeBox"><div class="passage-heading"><p class="eyebrow" id="passageTheme">ROAD NOTES / 01</p><h2 id="passageTitle">A clear line</h2></div>
     <div id="text" class="mono"></div>
     <div class="hint">Type the text above. Fix typos with BACKSPACE before continuing. &nbsp;|&nbsp; ESC to quit.</div>
   </div>
@@ -97,6 +97,8 @@
 </div>
 
 <script src="game-core.js"></script>
+<script src="passages.js"></script>
+<script src="audio-engine.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
